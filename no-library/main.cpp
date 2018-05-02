@@ -15,14 +15,7 @@ int main() {
 		printf("Failed to open X display\n");
 		exit(1);
 	}
-
-	int glx_major, glx_minor;
-	bool res = glXQueryVersion(display, &glx_major, &glx_minor);
 	
-	if (!res) {
-		printf("Invalid GLX Version");
-	}
-  
 	printf( "Getting matching framebuffer configs\n" );
 	
 	// Get a matching FB config
