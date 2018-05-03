@@ -9,7 +9,27 @@ float mapSphere (
     return length(p) - r;
 }
 
-vec3 ray_march (
+float mapWorld (
+	in vec3 p
+) {
+	return length(p);
+}
+
+vec3 calculateNormal (
+	in vec3 p
+) {
+    const vec3 small_step = vec3(0.001, 0.0, 0.0);
+
+    float gradient_x = mapWorld(p + small_step.xyy) - mapWorld(p - small_step.xyy);
+    float gradient_y = mapWorld(p + small_step.yxy) - mapWorld(p - small_step.yxy);
+    float gradient_z = mapWorld(p + small_step.yyx) - mapWorld(p - small_step.yyx);
+
+    vec3 normal = vec3(gradient_x, gradient_y, gradient_z);
+
+    return normalize(normal);
+}
+
+vec3 rayMarch (
 	in vec3 ro, // ray origin
 	in vec3 rd 	// ray direction
 ) {
@@ -24,7 +44,8 @@ vec3 ray_march (
         float distance_to_closest = mapSphere(current_position, 1.0);
 
         if (distance_to_closest < MINIMUM_HIT_DISTANCE) {
-            return vec3(1.0, 0.0, 0.0);
+            vec3 surfaceNormal = calculateNormal(current_position);
+            return surfaceNormal;
         }
 
         total_distance_traveled += distance_to_closest;
@@ -42,10 +63,10 @@ vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
 void main() {
 	vec2 uv = 2.0 * normalize(gl_FragCoord).xy - 1.0;
 
-    vec3 camera_position = vec3(0.0, 0.0, 5.0);
+    vec3 camera_position = vec3(0.0, 0.0, 10.0);
     vec3 ro = camera_position;
     vec3 rd = rayDirection(45.0, vec2(480, 480), gl_FragCoord.xy);
 
-	vec3 shadedColor = ray_march(ro, rd);
+	vec3 shadedColor = rayMarch(ro, rd);
 	color = vec4(shadedColor, 1.0);
 }
